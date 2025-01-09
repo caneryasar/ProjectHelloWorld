@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: afb42b601ebc8ed46b3bf04cdd3a68a8
+guid: 0f4903f270bc71e419cf8fff7b129220
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Running (F)
+      name: Bored
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 17
+      lastFrame: 210
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

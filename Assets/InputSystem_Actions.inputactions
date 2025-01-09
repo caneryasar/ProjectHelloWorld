@@ -33,6 +33,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "AttackCombo2",
+                    "type": "Button",
+                    "id": "21ae5fb3-fbd1-46d0-aaed-77c097d6ea88",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "MultiTap",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "AttackCombo3",
+                    "type": "Button",
+                    "id": "fbf173d9-c9d0-40b3-b2e1-4b3e0bea2e1e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "MultiTap(tapCount=3)",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "AttackSecondary",
                     "type": "Button",
                     "id": "46bf98c9-eab6-493a-8a89-b6d8372bedb9",
@@ -93,6 +111,15 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Dash",
+                    "type": "Button",
+                    "id": "afa22eff-f369-4f3f-bc57-98720b6718f7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "MultiTap",
                     "initialStateCheck": false
                 }
             ],
@@ -319,6 +346,116 @@
                 },
                 {
                     "name": "",
+                    "id": "d8502504-fb56-418b-9bbc-232836a410ea",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "AttackCombo2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f139bcb6-e08f-42e5-9463-b6fb4e0319ef",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "AttackCombo2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b273db90-d5fe-49ac-9330-7a88bad5ec4c",
+                    "path": "<Touchscreen>/primaryTouch/tap",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "AttackCombo2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b09a02bf-d542-4e0d-a5fd-e27986fa9905",
+                    "path": "<Joystick>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "AttackCombo2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "38827be6-1b3d-4e6c-97b2-73cfe3f20244",
+                    "path": "<XRController>/{PrimaryAction}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR",
+                    "action": "AttackCombo2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f04f68b9-4762-4941-9118-66249479332a",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "AttackCombo3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa77f583-5776-4030-9952-0ae4d8ee4a4d",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "AttackCombo3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7b26aabd-6d3f-4b1b-8573-cddb560445eb",
+                    "path": "<Touchscreen>/primaryTouch/tap",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "AttackCombo3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "43a3cc38-7fa7-4e3a-afdd-bc477d074467",
+                    "path": "<Joystick>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Joystick",
+                    "action": "AttackCombo3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "14b7b14b-3658-4ed7-a2b8-be8d8bd5257a",
+                    "path": "<XRController>/{PrimaryAction}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR",
+                    "action": "AttackCombo3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "795f7f3c-f808-434c-89a8-610a30532e8c",
                     "path": "<Mouse>/rightButton",
                     "interactions": "",
@@ -479,6 +616,39 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d254266-f0db-498c-ab60-b27db0ba23d0",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20fbdc69-d529-4730-b5b5-446533549321",
+                    "path": "<Gamepad>/leftStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ba486003-b4ec-494c-9808-64650cb03ab5",
+                    "path": "<XRController>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR",
+                    "action": "Dash",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

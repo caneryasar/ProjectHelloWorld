@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour {
 
     void Start() {
         
+        _eventArchive.InvokeOnPlayable(true);
     }
     
     void Update() {
