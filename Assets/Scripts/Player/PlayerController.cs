@@ -1,21 +1,35 @@
 using System;
+using System.Collections;
+using Autodesk.Fbx;
+using Cinemachine;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
+
+
+//todo: sprint/dash
 
 public class PlayerController : MonoBehaviour {
     
     private EventArchive _eventArchive;
-
-    private CharacterController _charCon;
-
+    
+    public Transform playerModel;
+    
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _rotationSpeed;
     [SerializeField] private float _jumpForce;
     [SerializeField] private float _dashDuration = 2f;
     [SerializeField] private float _dashDistance = 5f;
-    [SerializeField] private float _attackComboTime = 1f;
-    [SerializeField] private float _attackComboTimeAlt = 1f;
+    [SerializeField] private float _attackComboTime = .75f;
+    [SerializeField] private float _attackComboTimeAlt = 1f; 
     [SerializeField] private float _attackCounterTime = 1f;
+    
+    private Transform _playerCam;
+    [SerializeField] private CinemachineFreeLook playerCmFreeLook;
+    [SerializeField] private CinemachineVirtualCamera playerCmVCam;
+    private CharacterController _charCon;
     
     private Vector3 _moveInput;    
     private Vector2 _lookInput;
@@ -30,11 +44,19 @@ public class PlayerController : MonoBehaviour {
     private bool _isGrounded;
     private bool _isDashing;
 
+    private bool _inDash;
+
+    private bool _focusTriggered;
+    private bool _isFocused;
+    private Transform _target;
+
     private float _defaultSpeed;
     private float _runSpeed;
 
     private float _dashTime = 0f;
     private float _dashSpeed;
+
+    private float _comboTimer = 0f;
 
     private int _sprintTriggered;
     private int _jumpTriggered;
@@ -45,27 +67,56 @@ public class PlayerController : MonoBehaviour {
 
     private const float Gravity = -9.81f;
     
-    //todo: invoke player specific methods from eventArchive
     
     private void Awake() {
 
         if(_eventArchive == null) { Subscribe(); }
 
         _charCon = GetComponent<CharacterController>();
+        playerCmFreeLook = GetComponentInChildren<CinemachineFreeLook>();
+        playerCmVCam = GetComponentInChildren<CinemachineVirtualCamera>();
+        
     }
 
     private void Subscribe() {
         
         _eventArchive = FindAnyObjectByType<EventArchive>();
 
-        _eventArchive.OnMoveInput += GetMoveInput;
-        _eventArchive.OnSprintInput += GetSprintInput;
-        _eventArchive.OnJumpInput += GetJumpInput;
+        _eventArchive.OnMoveInput += input => {
+
+            _moveInput = Vector3.forward * input.y + Vector3.right * input.x;
+        };
+        _eventArchive.OnSprintInput += x => _isSprinting = x;
+        _eventArchive.OnJumpInput += x => _isJumping = x;
         _eventArchive.OnAttack += () => _isAttacking = true;
         _eventArchive.On2ndAttack += () => _is2ndCombo = true;
         _eventArchive.On3rdAttack += () => _is3rdCombo = true;
         _eventArchive.OnJumpTriggered += () =>  _jumpTriggered++;
         _eventArchive.OnDashTriggered += () => _isDashing = true;
+        _eventArchive.OnFocus += () => _focusTriggered = true;
+        _eventArchive.OnFocusHold += holding => {
+            
+            _isFocused = holding;
+
+            if(holding) {
+                
+                playerCmVCam.Priority = 10;
+                playerCmFreeLook.Priority = 0;
+            }
+        };
+        _eventArchive.OnTargetAssigned += t => {
+            
+            _target = t;
+            playerCmVCam.LookAt = _target;
+
+        };
+        _eventArchive.OnResetCamTarget += () => {
+            
+            playerCmFreeLook.
+            
+            playerCmVCam.m_Priority = 0;
+            playerCmFreeLook.Priority = 10;
+        };
     }
 
     private void Start() {
@@ -76,6 +127,11 @@ public class PlayerController : MonoBehaviour {
         _runSpeed = _defaultSpeed * 2f;
         _dashSpeed = _dashDistance / _dashDuration;
 
+        _target = playerModel;
+
+        // _playerCam = GetComponentInChildren<CinemachineFreeLook>().transform;
+        if(Camera.main != null) _playerCam = Camera.main.transform;
+
         this.ObserveEveryValueChanged(_ => _attackTriggered).Subscribe(_ => {
 
             _eventArchive.InvokeOnAttackCountChange(_attackTriggered);
@@ -83,31 +139,57 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update() {
+
+        _isGrounded = _moveInput != Vector3.zero ? _charCon.isGrounded : Physics.Raycast(transform.position + (Vector3.up * (_charCon.height * .5f)), -transform.up, _charCon.height * .6f);
+        _moveSpeed = (_isSprinting && _isGrounded) ? _runSpeed : _defaultSpeed;
         
-        //todo: make forward based on camera look
+        var camFwd = _playerCam.forward;
+        camFwd.y = 0;
+        camFwd.Normalize();
+        var camRight = _playerCam.right;
+        camRight.y = 0;
+        camRight.Normalize();
+        
+        var moveDirection = camFwd * _moveInput.z + camRight * _moveInput.x;
 
-        if(_isAttacking && !_isDashing) {
+        
+        if(_focusTriggered) {
+
+            _eventArchive.InvokeOnTargetSearch(transform);
+        }
+
+        if(_isFocused) {
             
-            //todo:find directed or selected enemy and move towards it
+            transform.LookAt(_target);
+        }
+        
+        if(_isAttacking && !_isDashing && _isGrounded) {
 
-            // var fakeDistance = 7f;
+            if(_isFocused) {
 
-            // _charCon.Move(transform.forward * (fakeDistance * Time.deltaTime));
-
-            Debug.Log($"combo: {_attackTriggered} / 2nd: {_is2ndCombo} / 3rd: {_is3rdCombo}");
+                if(_target) {
+                    
+                    transform.DOMove(_target.position - (Vector3.forward + Vector3.right) * .65f, 1f);
+                }
+            }
             
             if(_attackTriggered == 0) {
 
                 _attackTriggered = 1;
+
+                _comboTimer = _attackComboTime;
             }
             
-            if(_attackTime < _attackComboTime) {
+            
+            if(_attackTime < _comboTimer) {
 
                 if(_is2ndCombo && _attackTriggered == 1) {
 
                     _attackTriggered = 2;
                     
                     _attackTime = 0;
+
+                    _comboTimer = _attackComboTimeAlt;
                     
                     _eventArchive.InvokeOnSecondAttack();
 
@@ -119,6 +201,8 @@ public class PlayerController : MonoBehaviour {
                     _attackTriggered = 3;
                     
                     _attackTime = 0;
+
+                    _comboTimer = _attackComboTimeAlt;
                     
                     _eventArchive.InvokeOnThirdAttack();
 
@@ -138,6 +222,7 @@ public class PlayerController : MonoBehaviour {
             _is3rdCombo = false;
             _attackTriggered = 0;
             _attackTime = 0f;
+            _comboTimer = 0f;
             
             return;
         }
@@ -147,30 +232,26 @@ public class PlayerController : MonoBehaviour {
         
         if(_isDashing && _isGrounded && _moveInput != Vector3.zero) {
 
-            if(_dashTime < _dashDuration) {
-                
-                _charCon.Move(transform.forward * (_dashSpeed * Time.deltaTime));
+            if(_inDash) { return; }
 
-                _dashTime += Time.deltaTime;
-                
-                return;
-            }
+            transform.DOMove(transform.position + transform.forward * _dashDistance, _dashDuration).OnUpdate(() =>_inDash = true)
+                .OnComplete(() => {
+                    _inDash = false;
+                    _isDashing = false;
+                });
+        }
+        else {
             
+            if(_inDash) { return; }
             _isDashing = false;
-
-            _dashTime = 0f;
         }
 
-        _isGrounded = _moveInput != Vector3.zero ? _charCon.isGrounded : Physics.Raycast(transform.position, -transform.up, _charCon.height * .05f);
-        
-        _moveSpeed = _isSprinting ? _runSpeed : _defaultSpeed;
-        
-        _charCon.Move(_moveInput * (Time.deltaTime * _moveSpeed));
+        _charCon.Move(moveDirection * (Time.deltaTime * _moveSpeed));
 
-        if(_moveInput != Vector3.zero) {
+        if(_moveInput != Vector3.zero && !_isFocused) {
 
             var currentFwd = transform.forward;
-            transform.forward = Vector3.SlerpUnclamped(currentFwd, _moveInput, _rotationSpeed * Time.deltaTime);
+            transform.forward = Vector3.SlerpUnclamped(currentFwd, moveDirection, _rotationSpeed * Time.deltaTime);
         }
         
         if(_isGrounded && _verticalVelocity < 0f) {
@@ -204,14 +285,7 @@ public class PlayerController : MonoBehaviour {
         var moveUpwards = new Vector3(0, _verticalVelocity, 0);
         _charCon.Move(moveUpwards * Time.deltaTime);
 
-        _isDashing = false;
     }
-
-    private void GetJumpInput(bool receivedInput) { _isJumping = receivedInput; }
-
-    private void GetSprintInput(bool receivedInput) { _isSprinting = receivedInput; }
-
-    private void GetMoveInput(Vector2 receivedInput) { _moveInput = new Vector3(receivedInput.x, 0, receivedInput.y); }
 
     
 }

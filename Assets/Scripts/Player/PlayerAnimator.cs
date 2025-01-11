@@ -68,7 +68,18 @@ public class PlayerAnimator : MonoBehaviour {
     private void SetAttack() {
         
         // _animator.SetInteger(ComboStep, 1);
+
+        if(_animator.GetCurrentAnimatorStateInfo(0).IsTag("NotAttackable")) { return; }
+        
         _animator.SetBool(IsAttacking, true);
+        /*
+        if(_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") 
+           || _animator.GetCurrentAnimatorStateInfo(0).IsName("Move") 
+           || _animator.GetCurrentAnimatorStateInfo(0).IsName("Move (Fast)")) { 
+            
+            _animator.SetBool(IsAttacking, true);
+        }
+        */
     }
 
     private void ResetCombos() {

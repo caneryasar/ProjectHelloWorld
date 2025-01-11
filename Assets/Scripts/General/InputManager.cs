@@ -12,6 +12,7 @@ public class InputManager : MonoBehaviour {
     private InputAction _sprint;
     private InputAction _jump;
     private InputAction _dash;
+    private InputAction _focus;
     private InputAction _attack;
     private InputAction _attackCombo2;
     private InputAction _attackCombo3;
@@ -28,10 +29,11 @@ public class InputManager : MonoBehaviour {
         _sprint = InputSystem.actions.FindAction("Sprint");
         _jump = InputSystem.actions.FindAction("Jump");
         _dash = InputSystem.actions.FindAction("Dash");
+        _focus = InputSystem.actions.FindAction("AttackSecondary");
         _attack = InputSystem.actions.FindAction("Attack");
         _attackCombo2 = InputSystem.actions.FindAction("AttackCombo2");
         _attackCombo3 = InputSystem.actions.FindAction("AttackCombo3");
-
+        
         _eventArchive.OnPlayable += ChangePlayableStatus;
     }
 
@@ -55,6 +57,8 @@ public class InputManager : MonoBehaviour {
         if(_jump.triggered) { _eventArchive.InvokeOnJumpTriggered(); } 
         if(_dash.triggered) { _eventArchive.InvokeOnDashTriggered(); } 
         _eventArchive.InvokeOnSprintInput(_sprint.IsPressed());
+        if(_focus.triggered) { _eventArchive.InvokeOnFocus(); }
+        _eventArchive.InvokeOnFocusHold(_focus.IsPressed());
         if(_attack.triggered) { _eventArchive.InvokeOnAttack(); }
         if(_attackCombo2.triggered) { _eventArchive.InvokeOn2ndAttack(); }
         if(_attackCombo3.triggered) { _eventArchive.InvokeOn3rdAttack(); }

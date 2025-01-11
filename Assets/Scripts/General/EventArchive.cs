@@ -27,11 +27,22 @@ public class EventArchive : MonoBehaviour {
     public event Action<bool> OnPlayable;
     public event Action<bool> OnDoubleJump;
     public event Action OnResetJump;
+    public event Action<Enemy> OnPlayerHitEnemy;
+    public event Action OnEnemyHitPlayer;
+    public event Action<Transform> OnTargetSearch; 
+    public event Action<Transform> OnTargetAssigned;
+    public event Action OnResetCamTarget;
     
     //Methods
     public void InvokeOnPlayable(bool isPlayable) { OnPlayable?.Invoke(isPlayable); }
     public void InvokeOnDoubleJump(bool isJumped) { OnDoubleJump?.Invoke(isJumped); }
     public void InvokeOnResetJump() { OnResetJump?.Invoke(); }
+    public void InvokeOnPlayerHitEnemy(Enemy hit) { OnPlayerHitEnemy?.Invoke(hit); }
+    public void InvokeOnEnemyHitPlayer() { OnEnemyHitPlayer?.Invoke(); }
+    
+    public void InvokeOnTargetAssigned(Transform target) { OnTargetAssigned?.Invoke(target);}
+    public void InvokeOnTargetSearch(Transform player) { OnTargetSearch?.Invoke(player);}
+    public void InvokeOnResetCamTarget() { OnResetCamTarget?.Invoke(); }
 
     #endregion
     
@@ -43,6 +54,8 @@ public class EventArchive : MonoBehaviour {
     public event Action OnJumpTriggered;
     public event Action OnDashTriggered;
     public event Action<bool> OnJumpInput;
+    public event Action OnFocus;
+    public event Action<bool> OnFocusHold;
     public event Action OnAttack;
     public event Action On2ndAttack;
     public event Action On3rdAttack; 
@@ -53,6 +66,8 @@ public class EventArchive : MonoBehaviour {
     public void InvokeOnJumpInput(bool jumpInput) { OnJumpInput?.Invoke(jumpInput); }
     public void InvokeOnJumpTriggered() { OnJumpTriggered?.Invoke(); }
     public void InvokeOnDashTriggered() { OnDashTriggered?.Invoke(); }
+    public void InvokeOnFocus() { OnFocus?.Invoke(); }
+    public void InvokeOnFocusHold(bool isHolding) { OnFocusHold?.Invoke(isHolding); }
     public void InvokeOnAttack() { OnAttack?.Invoke(); }
     public void InvokeOn2ndAttack() { On2ndAttack?.Invoke(); }
     public void InvokeOn3rdAttack() { On3rdAttack?.Invoke(); }
