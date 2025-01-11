@@ -1,4 +1,4 @@
-using Cinemachine;
+
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -40,14 +40,12 @@ public class PlayerInteractions : MonoBehaviour {
     public void CheckForEnemyHit() {
 
         var origin = transform.position + (Vector3.up * _charCon.height * .5f);
-
-        Debug.DrawRay(origin, transform.forward + Vector3.forward * .5f, Color.blue);
         
         if(Physics.SphereCast(origin, .5f, transform.forward, out var raycastHit)) {
-
+            
             if(raycastHit.transform.CompareTag("Enemy")) {
                 
-                Debug.Log($"hit enemy! {raycastHit.transform.name}");
+                _eventArchive.InvokeOnPlayerHitEnemy(raycastHit.transform.GetComponent<EnemyBehaviour>());
             }
         }
     }

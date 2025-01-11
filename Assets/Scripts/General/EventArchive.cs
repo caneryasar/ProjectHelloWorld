@@ -13,11 +13,13 @@ public class EventArchive : MonoBehaviour {
     public event Action OnSecondAttack;
     public event Action OnThirdAttack;
     public event Action<int> OnAttackCountChange;
+    public event Action<Vector2> OnDirectionChangeFocused; 
 
     public void InvokeOnComboBroken() { OnComboBroken?.Invoke(); }
     public void InvokeOnSecondAttack() { OnSecondAttack?.Invoke(); }
     public void InvokeOnThirdAttack() { OnThirdAttack?.Invoke(); }
     public void InvokeOnAttackCountChange(int count) { OnAttackCountChange?.Invoke(count);}
+    public void InvokeOnDirectionChangeFocused(Vector2 direction) { OnDirectionChangeFocused?.Invoke(direction);}
     
     #endregion
     
@@ -27,22 +29,24 @@ public class EventArchive : MonoBehaviour {
     public event Action<bool> OnPlayable;
     public event Action<bool> OnDoubleJump;
     public event Action OnResetJump;
-    public event Action<Enemy> OnPlayerHitEnemy;
+    public event Action<EnemyBehaviour> OnPlayerHitEnemy;
     public event Action OnEnemyHitPlayer;
     public event Action<Transform> OnTargetSearch; 
     public event Action<Transform> OnTargetAssigned;
     public event Action OnResetCamTarget;
+    public event Action<int> OnCounterTriggered; 
     
     //Methods
     public void InvokeOnPlayable(bool isPlayable) { OnPlayable?.Invoke(isPlayable); }
     public void InvokeOnDoubleJump(bool isJumped) { OnDoubleJump?.Invoke(isJumped); }
     public void InvokeOnResetJump() { OnResetJump?.Invoke(); }
-    public void InvokeOnPlayerHitEnemy(Enemy hit) { OnPlayerHitEnemy?.Invoke(hit); }
+    public void InvokeOnPlayerHitEnemy(EnemyBehaviour hit) { OnPlayerHitEnemy?.Invoke(hit); }
     public void InvokeOnEnemyHitPlayer() { OnEnemyHitPlayer?.Invoke(); }
     
     public void InvokeOnTargetAssigned(Transform target) { OnTargetAssigned?.Invoke(target);}
     public void InvokeOnTargetSearch(Transform player) { OnTargetSearch?.Invoke(player);}
     public void InvokeOnResetCamTarget() { OnResetCamTarget?.Invoke(); }
+    public void InvokeOnCounterTriggered(int counter) { OnCounterTriggered?.Invoke(counter);}
 
     #endregion
     

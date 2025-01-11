@@ -1,12 +1,13 @@
-using System;
+/*using System;
 using System.Collections;
 using DG.Tweening;
+using UniRx;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour {
-
+    
     internal Animator animator;
 
     internal NavMeshAgent navMeshAgent;
@@ -22,10 +23,12 @@ public class Enemy : MonoBehaviour {
     internal bool canAttack;
     internal bool isAttacking;
     internal bool isHit;
+    internal bool countered;
+    internal bool finished;
 
     internal bool normalDeath;
 
-    private int _health = 3;
+    [SerializeField] private int _health = 3;
 
     internal bool isDead;
 
@@ -41,13 +44,15 @@ public class Enemy : MonoBehaviour {
 
     private void GotHit(Enemy hit) {
 
+        Debug.Log("enemy got hit");
+        
         if(hit == this) {
 
             isHit = true;
             LowerHealth();
         }
 
-        DOVirtual.DelayedCall(1f, () => {
+        DOVirtual.DelayedCall(.5f, () => {
 
             isHit = false;
         }, false);
@@ -90,16 +95,37 @@ public class Enemy : MonoBehaviour {
 
     internal void CheckForHit() {
         
+        if(isDead) { return; }
         
-    }
+        var origin = transform.position + (Vector3.up * navMeshAgent.height * .5f);
+        
+        if(Physics.SphereCast(origin, .5f, transform.forward * navMeshAgent.radius, out var raycastHit)) {
 
+            Debug.Log(Time.time);
+            
+            if(raycastHit.transform.CompareTag("Player")) {
+                
+                _eventArchive.InvokeOnEnemyHitPlayer();
+            }
+        }
+    }
+    
+    
     internal void Dead() {
         
-        
+        _canProcess = false;
     }
 
     internal void LowerHealth() {
 
         _health--;
+
+        if(_health <= 0) {
+            
+            finished = player.inFinisher;
+            countered = player.inCounter;
+            
+            isDead = true;
+        }
     }
-}
+}*/

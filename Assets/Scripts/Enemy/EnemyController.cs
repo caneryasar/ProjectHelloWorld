@@ -7,7 +7,8 @@ public class EnemyController : MonoBehaviour {
 
     // public GameObject enemy;
 
-    [SerializeField] private List<Enemy> _enemies;
+    // [SerializeField] private List<Enemy> _enemies;
+    [SerializeField] private List<EnemyBehaviour> _enemies;
 
     private EventArchive _eventArchive;
 
@@ -19,7 +20,7 @@ public class EnemyController : MonoBehaviour {
 
         _eventArchive = FindAnyObjectByType<EventArchive>();
 
-        _enemies = GetComponentsInChildren<Enemy>().ToList();
+        _enemies = GetComponentsInChildren<EnemyBehaviour>().ToList();
         // _enemies = FindObjectsByType<Enemy>(0).ToList();
         _activeEnemies = _enemies.Count;
     }
@@ -72,11 +73,11 @@ public class EnemyController : MonoBehaviour {
     private void FindClosestEnemy(Transform player) {
         
         var distance = Mathf.Infinity;
-        Enemy target = null;
+        EnemyBehaviour target = null;
         
         foreach(var enemy in _enemies) {
 
-            if(enemy.isDead) { return; }
+            if(enemy.isDead) { continue; }
             
             var distanceToEnemy = Vector3.Distance(player.position, enemy.transform.position);
 

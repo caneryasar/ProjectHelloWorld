@@ -1,3 +1,4 @@
+/*
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -83,10 +84,12 @@ public class EnemyState {
         var worldDirection = (target - model.transform.position).normalized;
 
         var localDirection = model.transform.InverseTransformDirection(worldDirection);
-
-        var calculatedDirection = Vector2.up * localDirection.z + Vector2.right * localDirection.x;
         
-        return calculatedDirection;
+        // var calculatedDirection = model.transform.forward * (Vector2.up * localDirection.z) + model.transform.right * (Vector2.right * localDirection.x);
+
+        var result = Vector2.right * localDirection.x + Vector2.up * localDirection.z;
+        
+        return result;
     }
     
 }
@@ -103,7 +106,6 @@ public class Idle : EnemyState {
 
     protected override void Enter() {
         
-                
         animator.SetTrigger("Idling");
         
         base.Enter();
@@ -181,6 +183,8 @@ public class Strafe : EnemyState {
             
             nextEnemyState = new Hit(enemy);
             stage = EVENT.EXIT;
+            
+            return;
         }
         
         // model.transform.LookAt(new Vector3(playerTransform.position.x, model.transform.position.y, playerTransform.position.z));
@@ -192,8 +196,6 @@ public class Strafe : EnemyState {
         }
         
         var direction = CalculateDirection(_target);
-
-        Debug.Log(direction);
         
         animator.SetFloat("DirectionZ", direction.y);
         animator.SetFloat("DirectionX", direction.x);
@@ -204,9 +206,7 @@ public class Strafe : EnemyState {
         }
         
         agent.SetDestination(_target);
-        model.transform.LookAt(playerTransform.position);
-        
-        Debug.Log($"distance: {Vector3.Distance(agent.transform.position, _target)}");
+        model.transform.LookAt(new Vector3(playerTransform.position.x, model.transform.position.y, playerTransform.position.z));
     }
 
     protected override void Exit() {        
@@ -229,11 +229,18 @@ public class Hit : EnemyState {
         state = STATE.HIT;
     }
 
-    protected override void Enter() {        
+    protected override void Enter() {
+
+        if(animator.GetCurrentAnimatorStateInfo(-1).IsName("Hit")) {
+            
+            animator.Play("Hit", -1, 0);
+        }
+        else {
+            
+            animator.SetTrigger("Hit");
+        }
         
         
-        animator.SetTrigger("Hit");
-        enemy.LowerHealth();
         base.Enter();
     }
 
@@ -244,6 +251,12 @@ public class Hit : EnemyState {
             
             nextEnemyState = new Die(enemy);
             stage = EVENT.EXIT;
+        }
+
+        if(enemy.isHit) {
+            
+            nextEnemyState = new Hit(enemy);
+            stage = EVENT.ENTER;
         }
         
 
@@ -256,19 +269,16 @@ public class Hit : EnemyState {
 
     protected override void Exit() {        
         
-        
-        
         animator.ResetTrigger("Hit");
         base.Exit();
     }
 }
 public class Attack : EnemyState {
     
-    public Attack(Enemy _enemy) : base(_enemy) {
+    public Attack(EnemyBehaviour _enemy) : base(_enemy) {
         
         agent.speed = 7.5f;
         agent.isStopped = false;
-        
         
         state = STATE.ATTACK;
     }
@@ -320,29 +330,30 @@ public class Attack : EnemyState {
     }
 }
 public class Die : EnemyState {
-
-    private bool _normalDeath;
     
     public Die(Enemy _enemy) : base(_enemy) {
 
-        _normalDeath = enemy.normalDeath;
+        agent.speed = 0;
+        agent.isStopped = true;
         
         state = STATE.DIE;
     }
 
     protected override void Enter() {
         
-        animator.SetTrigger(_normalDeath ? "Dead" : "DeadAlt");
-
-        enemy.Dead();
+        Debug.Log($"enter - die / enemy status: {enemy.finished}");
         
-                base.Exit();
+        
+        animator.SetTrigger(enemy.finished ? "DeadAlt" : "Dead");
+
+
+        base.Enter();
     }
 
     protected override void Update() {
         
         
-        //stage = EVENT.EXIT;
+        stage = EVENT.EXIT;
     }
 
     protected override void Exit() {
@@ -350,6 +361,8 @@ public class Die : EnemyState {
         animator.ResetTrigger("Dead");
         animator.ResetTrigger("DeadAlt");
         
+        enemy.Dead();
         base.Exit();
     }
 }
+*/

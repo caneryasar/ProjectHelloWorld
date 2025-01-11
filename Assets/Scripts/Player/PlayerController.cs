@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using Autodesk.Fbx;
-using Cinemachine;
 using DG.Tweening;
 using UniRx;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -27,8 +27,8 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private float _attackCounterTime = 1f;
     
     private Transform _playerCam;
-    [SerializeField] private CinemachineFreeLook playerCmFreeLook;
-    [SerializeField] private CinemachineVirtualCamera playerCmVCam;
+    [SerializeField] private CinemachineCamera playerCmFreeLook;
+    [SerializeField] private CinemachineCamera playerCmVCam;
     private CharacterController _charCon;
     
     private Vector3 _moveInput;    
@@ -43,8 +43,13 @@ public class PlayerController : MonoBehaviour {
     private bool _doubleJumpable;
     private bool _isGrounded;
     private bool _isDashing;
+    private bool _isHit;
 
+    internal bool inFinisher;
+    internal bool inCounter;
     private bool _inDash;
+
+    private bool _canFight;
 
     private bool _focusTriggered;
     private bool _isFocused;
@@ -73,8 +78,8 @@ public class PlayerController : MonoBehaviour {
         if(_eventArchive == null) { Subscribe(); }
 
         _charCon = GetComponent<CharacterController>();
-        playerCmFreeLook = GetComponentInChildren<CinemachineFreeLook>();
-        playerCmVCam = GetComponentInChildren<CinemachineVirtualCamera>();
+        playerCmFreeLook = GetComponentInChildren<CinemachineCamera>();
+        playerCmVCam = GetComponentInChildren<CinemachineCamera>();
         
     }
 
@@ -111,10 +116,10 @@ public class PlayerController : MonoBehaviour {
 
         };
         _eventArchive.OnResetCamTarget += () => {
+
+            playerCmFreeLook.LookAt = playerModel;
             
-            playerCmFreeLook.
-            
-            playerCmVCam.m_Priority = 0;
+            playerCmVCam.Priority = 0;
             playerCmFreeLook.Priority = 10;
         };
     }
@@ -139,6 +144,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update() {
+        
+        // Debug.Log($"finisher: {inFinisher} / counter: {inCounter}");
 
         _isGrounded = _moveInput != Vector3.zero ? _charCon.isGrounded : Physics.Raycast(transform.position + (Vector3.up * (_charCon.height * .5f)), -transform.up, _charCon.height * .6f);
         _moveSpeed = (_isSprinting && _isGrounded) ? _runSpeed : _defaultSpeed;
@@ -159,6 +166,12 @@ public class PlayerController : MonoBehaviour {
         }
 
         if(_isFocused) {
+
+            var relativeDirection = transform.InverseTransformDirection(moveDirection);
+            relativeDirection.y = 0;
+            relativeDirection.Normalize();
+            
+            _eventArchive.InvokeOnDirectionChangeFocused(relativeDirection);
             
             transform.LookAt(_target);
         }
@@ -170,6 +183,33 @@ public class PlayerController : MonoBehaviour {
                 if(_target) {
                     
                     transform.DOMove(_target.position - (Vector3.forward + Vector3.right) * .65f, 1f);
+                }
+            }
+
+            if(!_isFocused) {
+
+                if(Physics.SphereCast(transform.position + Vector3.up * (_charCon.height * .5f), 5f, Vector3.zero,
+                       out var hitInfo, 5f, 10)) {
+
+                    var enemy = hitInfo.transform.GetComponent<EnemyBehaviour>();
+                    
+                    if(!enemy) { return;}
+
+                    if(enemy.isAttacking) {
+
+                        var targetPos = hitInfo.transform.position;
+                        targetPos.y = transform.position.y;
+                        
+                        transform.LookAt(targetPos);
+                        transform.DOMove(targetPos, 1f).SetEase(Ease.Linear).OnComplete(() => {
+
+                            enemy.countered = true;
+                            _eventArchive.InvokeOnCounterTriggered(Random.Range(1, 4));
+                            
+                        });
+
+                        inCounter = true;
+                    }
                 }
             }
             
@@ -206,6 +246,7 @@ public class PlayerController : MonoBehaviour {
                     
                     _eventArchive.InvokeOnThirdAttack();
 
+                    inFinisher = true;
                     
                     return;
                 }
@@ -223,6 +264,8 @@ public class PlayerController : MonoBehaviour {
             _attackTriggered = 0;
             _attackTime = 0f;
             _comboTimer = 0f;
+            inFinisher = false;
+            inCounter = false;
             
             return;
         }
@@ -234,7 +277,7 @@ public class PlayerController : MonoBehaviour {
 
             if(_inDash) { return; }
 
-            transform.DOMove(transform.position + transform.forward * _dashDistance, _dashDuration).OnUpdate(() =>_inDash = true)
+            transform.DOMove(transform.position + transform.forward * _dashDistance, _dashDuration).SetEase(Ease.Linear).OnUpdate(() =>_inDash = true)
                 .OnComplete(() => {
                     _inDash = false;
                     _isDashing = false;

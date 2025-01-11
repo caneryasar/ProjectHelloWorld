@@ -43,7 +43,20 @@ public class PlayerAnimator : MonoBehaviour {
         _eventArchive.OnThirdAttack += Trigger3rdCombo;
         _eventArchive.OnComboBroken += ResetCombos;
         _eventArchive.OnAttackCountChange += ChangeComboChange;
+        _eventArchive.OnDirectionChangeFocused += GetDirection;
+        _eventArchive.OnFocusHold += SetMoveFocused;
         // _eventArchive.OnAttackInput += GetAttackInput;
+    }
+
+    private void SetMoveFocused(bool focused) {
+
+        _animator.SetBool("Focus", focused);
+    }
+
+    private void GetDirection(Vector2 direction) {
+        
+        _animator.SetFloat("DirectionX", direction.x);
+        _animator.SetFloat("DirectionZ", direction.y);
     }
 
     private void ChangeComboChange(int count) {
