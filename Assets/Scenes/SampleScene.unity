@@ -840,7 +840,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &148540767
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2202,7 +2202,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.026328553, y: -0.70229274, z: 0.026008843, w: 0.71092564}
-  m_LocalPosition: {x: 34.482105, y: 18.491247, z: 22.908585}
+  m_LocalPosition: {x: -8.517895, y: 2.4912465, z: -1.0914152}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5396,7 +5396,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Welcome to the playground!
+  m_text: "Welcome to the playground! \n\nPress Q to quit anytime."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5423,13 +5423,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 1.45
+  m_fontSize: 0.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 0.00001
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -11568,15 +11568,15 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: cc398208889886a46824f35638ec7a74, type: 3}
     - target: {fileID: 4718021833221654162, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 27
+      value: -16
       objectReference: {fileID: 0}
     - target: {fileID: 4718021833221654162, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 16
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4718021833221654162, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 23
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 4718021833221654162, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalRotation.w
@@ -11608,19 +11608,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4985991699082241792, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.47507972
+      value: 0.27955246
       objectReference: {fileID: 0}
     - target: {fileID: 4985991699082241792, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.013602162
+      value: -0.028711673
       objectReference: {fileID: 0}
     - target: {fileID: 4985991699082241792, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.87947726
+      value: 0.9546791
       objectReference: {fileID: 0}
     - target: {fileID: 4985991699082241792, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.025180599
+      value: 0.09805112
       objectReference: {fileID: 0}
     - target: {fileID: 5539807000839537051, guid: 03307f02395fa01489679e1227c72153, type: 3}
       propertyPath: m_Name
