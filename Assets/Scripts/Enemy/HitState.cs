@@ -8,13 +8,10 @@ public class HitState : IEnemyState {
         
         if(enemy.animator.GetCurrentAnimatorStateInfo(0).IsName("Hit")) {
             
-            Debug.Log("from hit");
-            
             enemy.animator.Play("Hit", -1, 0);
         }
         else {
             
-            Debug.Log("trigger hit");
             enemy.animator.SetTrigger("Hit");
         }
     }
@@ -33,7 +30,7 @@ public class HitState : IEnemyState {
             return;
         }
 
-        if(enemy.animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.8f) {
+        if(enemy.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f) {
             
             enemy.TransitionToState(new IdleState());
         }

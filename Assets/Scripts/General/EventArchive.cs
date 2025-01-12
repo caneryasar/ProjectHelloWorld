@@ -34,7 +34,9 @@ public class EventArchive : MonoBehaviour {
     public event Action<Transform> OnTargetSearch; 
     public event Action<Transform> OnTargetAssigned;
     public event Action OnResetCamTarget;
-    public event Action<int> OnCounterTriggered; 
+    public event Action<int> OnCounterTriggered;
+    public event Action<bool, EnemyBehaviour> OnCounterable;
+    public event Action<EnemyBehaviour> OnCurrentEnemyTarget;
     
     //Methods
     public void InvokeOnPlayable(bool isPlayable) { OnPlayable?.Invoke(isPlayable); }
@@ -47,6 +49,8 @@ public class EventArchive : MonoBehaviour {
     public void InvokeOnTargetSearch(Transform player) { OnTargetSearch?.Invoke(player);}
     public void InvokeOnResetCamTarget() { OnResetCamTarget?.Invoke(); }
     public void InvokeOnCounterTriggered(int counter) { OnCounterTriggered?.Invoke(counter);}
+    public void InvokeOnCounterable(bool canCounter, EnemyBehaviour counter) { OnCounterable?.Invoke(canCounter, counter);}
+    public void InvokeOnCurrentEnemyTarget(EnemyBehaviour target) { OnCurrentEnemyTarget?.Invoke(target);}
 
     #endregion
     

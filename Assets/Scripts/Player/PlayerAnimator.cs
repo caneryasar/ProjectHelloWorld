@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class PlayerAnimator : MonoBehaviour {
@@ -32,7 +33,6 @@ public class PlayerAnimator : MonoBehaviour {
         _eventArchive = FindAnyObjectByType<EventArchive>();
 
         _eventArchive.OnMoveInput += SetMove;
-        // _eventArchive.OnLookInput += GetLookInput;
         _eventArchive.OnDoubleJump += SetDoubleJump;
         _eventArchive.OnSprintInput += SetSprint;
         _eventArchive.OnJumpInput += SetJump;
@@ -45,7 +45,29 @@ public class PlayerAnimator : MonoBehaviour {
         _eventArchive.OnAttackCountChange += ChangeComboChange;
         _eventArchive.OnDirectionChangeFocused += GetDirection;
         _eventArchive.OnFocusHold += SetMoveFocused;
-        // _eventArchive.OnAttackInput += GetAttackInput;
+        _eventArchive.OnEnemyHitPlayer += GetHit;
+        _eventArchive.OnCounterTriggered += SetCounter;
+    }
+
+    private void SetCounter(int counter) {
+        
+        Debug.Log($"current counter is: {counter}");
+        
+        _animator.SetBool("isCountering", true);
+        _animator.SetInteger("CounterType", counter);
+
+        DOVirtual.DelayedCall(1f, () => {
+            
+            _animator.SetInteger("CounterType", 0);
+            _animator.SetBool("isCountering", false);
+        });
+    }
+
+    private void GetHit() {
+        
+        _animator.SetLayerWeight(1, 1);
+
+        DOVirtual.DelayedCall(1f, () => { _animator.SetLayerWeight(1, 0); });
     }
 
     private void SetMoveFocused(bool focused) {
@@ -65,34 +87,22 @@ public class PlayerAnimator : MonoBehaviour {
     }
 
     private void Trigger2ndCombo() {
-        
-        // _animator.SetInteger(ComboStep, 2);        
+          
         _animator.SetBool("Combo2", true);
 
     }
 
     private void Trigger3rdCombo() {
         
-        // _animator.SetInteger(ComboStep, 3);        
         _animator.SetBool("Combo3", true);
 
     }
 
     private void SetAttack() {
-        
-        // _animator.SetInteger(ComboStep, 1);
 
         if(_animator.GetCurrentAnimatorStateInfo(0).IsTag("NotAttackable")) { return; }
         
         _animator.SetBool(IsAttacking, true);
-        /*
-        if(_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") 
-           || _animator.GetCurrentAnimatorStateInfo(0).IsName("Move") 
-           || _animator.GetCurrentAnimatorStateInfo(0).IsName("Move (Fast)")) { 
-            
-            _animator.SetBool(IsAttacking, true);
-        }
-        */
     }
 
     private void ResetCombos() {
@@ -100,7 +110,6 @@ public class PlayerAnimator : MonoBehaviour {
         _animator.SetBool("isAttacking", false);
         _animator.SetBool("Combo2", false);
         _animator.SetBool("Combo3", false);
-        // _animator.SetInteger("ComboStep", 0);
     }
 
     private void TriggerDash() {

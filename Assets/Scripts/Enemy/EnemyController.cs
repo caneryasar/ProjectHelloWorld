@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemyController : MonoBehaviour {
 
@@ -11,35 +13,55 @@ public class EnemyController : MonoBehaviour {
     [SerializeField] private List<EnemyBehaviour> _enemies;
 
     private EventArchive _eventArchive;
+    
+    private float _attackTime = 5f;
 
-    private int _activeEnemies;
-
-    private bool _playerInSight;
+    private float _distanceToCheck = 10f;
 
     private void Awake() {
 
         _eventArchive = FindAnyObjectByType<EventArchive>();
 
         _enemies = GetComponentsInChildren<EnemyBehaviour>().ToList();
-        // _enemies = FindObjectsByType<Enemy>(0).ToList();
-        _activeEnemies = _enemies.Count;
     }
 
     private void OnTriggerEnter(Collider other) {
+        
+        if(!other.CompareTag("Player")) { return; }
+        
+        CommandEnemies();
 
-        if(other.CompareTag("Player")) {
+        StartCoroutine(SetToAttackRoutine());
+    }
 
-            _playerInSight = true;
+    private IEnumerator SetToAttackRoutine() {
+        
+        while(true) {
             
-            CommandEnemies();
+            yield return new WaitForSeconds(_attackTime);
+            
+            SetToAttack();
+
+            yield return null;
         }
     }
+
+    private void SetToAttack() {
+        
+        var validEnemies = _enemies.Where(enemy => !enemy.isDead).ToList();
+
+        if(validEnemies.Count == 0) { return; }
+
+        var enemyIndex = Random.Range(0, validEnemies.Count);
+
+        
+        validEnemies[enemyIndex].isAttacking = true;
+    }
+
 
     private void OnTriggerExit(Collider other) {
 
         if(other.CompareTag("Player")) {
-
-            _playerInSight = false;
 
             PauseEnemies();
         }
@@ -47,6 +69,10 @@ public class EnemyController : MonoBehaviour {
 
     private void PauseEnemies() {
         
+        foreach(var enemy in _enemies) {
+            
+            enemy.canAttack = false;
+        }
         //todo: make enemy status change to idle
     }
 
@@ -54,6 +80,7 @@ public class EnemyController : MonoBehaviour {
         //todo: make enemy status change to strafe
 
         foreach(var enemy in _enemies) {
+            
             enemy.canAttack = true;
         }
     }
@@ -81,13 +108,16 @@ public class EnemyController : MonoBehaviour {
             
             var distanceToEnemy = Vector3.Distance(player.position, enemy.transform.position);
 
-            if(!(distanceToEnemy < distance)) { continue; }
+            if(!(distanceToEnemy < distance && distanceToEnemy <= _distanceToCheck)) { continue; }
             
             distance = distanceToEnemy;
             target = enemy;
         }
+
+        if(!target) { return; }
         
-        if(target) { _eventArchive.InvokeOnTargetAssigned(target.transform); }
+        _eventArchive.InvokeOnTargetAssigned(target.transform);
+        _eventArchive.InvokeOnCurrentEnemyTarget(target);
     }
 
     // Update is called once per frame

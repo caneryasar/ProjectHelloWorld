@@ -2,21 +2,24 @@ using System;
 using System.Collections;
 using DG.Tweening;
 using UniRx;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class EnemyBehaviour : MonoBehaviour {
     
-    // Components
     internal Animator animator;
     internal NavMeshAgent navMeshAgent;
     internal PlayerController player;
 
-    // State Machine
-    private IEnemyState currentState;
+    public Canvas indicatorCanvas;
+    public Image indicator;
 
-    // Flags
+    private IEnemyState _currentState;
+
     internal bool isDead;
     internal bool isHit;
     internal bool canAttack;
@@ -24,19 +27,30 @@ public class EnemyBehaviour : MonoBehaviour {
     internal bool countered;
     internal bool finished;
 
-    // Internal State
     private EventArchive _eventArchive;
     private bool _isPlayable;
     private bool _canProcess;
+    private bool _isSelected;
 
-    [SerializeField] private int _health = 3;
+    public int health = 3;
 
     private void Awake() {
         
-        // Event subscriptions
         _eventArchive = FindAnyObjectByType<EventArchive>();
         _eventArchive.OnPlayable += playable => _isPlayable = playable;
         _eventArchive.OnPlayerHitEnemy += GotHit;
+        _eventArchive.OnTargetAssigned += t => {
+            
+            if(t == transform) {
+                
+                _isSelected = true;
+                indicator.gameObject.SetActive(true);
+            }
+            else {
+                
+                _isSelected = false;
+                indicator.gameObject.SetActive(false); }
+        };
     }
 
     private void OnEnable() {
@@ -46,6 +60,8 @@ public class EnemyBehaviour : MonoBehaviour {
         if(_canProcess) {
             
             TransitionToState(new IdleState());
+            indicatorCanvas.gameObject.SetActive(true);
+            indicator.gameObject.SetActive(false);
         }
     }
 
@@ -64,10 +80,40 @@ public class EnemyBehaviour : MonoBehaviour {
     private void Update() {
         
         if(!_isPlayable || !_canProcess) return;
-
-        Debug.Log($"state: {currentState}");
         
-        currentState?.UpdateState(this); // Delegate behavior to the current state
+        _currentState?.UpdateState(this);
+
+        if(isDead) {
+            
+            indicatorCanvas.gameObject.SetActive(false); 
+            return;
+        }
+
+        indicatorCanvas.transform.LookAt(player.transform.position);
+
+        if(isAttacking) {
+
+            if(Vector3.Distance(transform.position, player.transform.position) < 3f) {
+
+                indicator.color = Color.green;
+                
+                return;
+            }
+            
+            indicator.color = Color.red;
+            
+            return;
+        }
+
+        if(_isSelected) {
+            
+            indicator.color = Color.yellow;
+            return;
+        }
+        
+        indicator.color = Color.white;
+        
+        
     }
 
     // Handle Hit Event
@@ -84,9 +130,9 @@ public class EnemyBehaviour : MonoBehaviour {
     // State Management
     public void TransitionToState(IEnemyState newState) {
         
-        currentState?.ExitState(this); // Exit the current state
-        currentState = newState; // Set the new state
-        currentState.EnterState(this); // Enter the new state
+        _currentState?.ExitState(this); // Exit the current state
+        _currentState = newState; // Set the new state
+        _currentState.EnterState(this); // Enter the new state
     }
 
     // Utility Methods Used by States
@@ -100,11 +146,14 @@ public class EnemyBehaviour : MonoBehaviour {
         
         return Vector3.Distance(transform.position, target) < 0.5f;
     }
-
-    public Vector3 GenerateTargetPosition() {
+    
+    internal Vector3 CalculateSphericalTargetPosition(float angle, float radius) {
         
-        var randomPoint = player.transform.position + Random.insideUnitSphere * 5f;
-        return NavMesh.SamplePosition(randomPoint, out var hit, 3f, NavMesh.AllAreas) ? hit.position : Vector3.zero;
+        var angleRad = angle * Mathf.Deg2Rad;
+
+        var offset = new Vector3(Mathf.Cos(angleRad) * radius, 0, Mathf.Sin(angleRad) * radius);
+
+        return player.transform.position + offset;
     }
 
     public void UpdateAnimatorDirection(Vector3 target) {
@@ -139,6 +188,8 @@ public class EnemyBehaviour : MonoBehaviour {
             if(raycastHit.transform.CompareTag("Player")) {
                 
                 _eventArchive.InvokeOnEnemyHitPlayer();
+
+                raycastHit.transform.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
             }
         }
     }
@@ -151,9 +202,9 @@ public class EnemyBehaviour : MonoBehaviour {
 
     internal void LowerHealth() {
         
-        _health--;
+        health--;
 
-        if(_health <= 0) {
+        if(health <= 0) {
             
             finished = player.inFinisher;
             countered = player.inCounter;
@@ -163,7 +214,7 @@ public class EnemyBehaviour : MonoBehaviour {
 
     private void ResetEnemy() {
         
-        _health = 3;
+        health = 3;
         isDead = false;
         isHit = false;
         finished = false;
