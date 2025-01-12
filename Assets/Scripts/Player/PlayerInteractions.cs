@@ -56,13 +56,11 @@ public class PlayerInteractions : MonoBehaviour {
                 
                 Debug.Log($"enemy is counterable: {enemy.name}");
                 
-                _eventArchive.InvokeOnCounterable(true, enemy);
+                _eventArchive.InvokeOnCounterable(enemy);
                 
                 return;
             }
         }
-        
-        _eventArchive.InvokeOnCounterable(false, null);
     }
 
     void Start() {
@@ -99,7 +97,6 @@ public class PlayerInteractions : MonoBehaviour {
     
 
     void Update() {
-        
     }
 
     private void OnDrawGizmos() {

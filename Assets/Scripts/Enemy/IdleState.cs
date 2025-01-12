@@ -1,3 +1,5 @@
+using Enemy;
+
 public class IdleState : IEnemyState {
     public void EnterState(EnemyBehaviour enemy) {
         enemy.navMeshAgent.isStopped = true;
@@ -6,22 +8,28 @@ public class IdleState : IEnemyState {
     }
 
     public void UpdateState(EnemyBehaviour enemy) {
+
+        enemy.LookAtPlayer();
+        
         if(enemy.isDead) {
+            
             enemy.TransitionToState(new DieState());
             return;
         }
 
-        if(enemy.isHit) {
-            enemy.TransitionToState(new HitState());
-            return;
+        if(enemy.CloseToPlayer(out var player)) {
+
+            if(player.inAttack && enemy.isTarget) {
+                
+                enemy.TransitionToState(new HitState());
+                return;
+            }
         }
 
         if(enemy.canAttack) {
             enemy.TransitionToState(new StrafeState());
             return;
         }
-
-        enemy.LookAtPlayer();
     }
 
     public void ExitState(EnemyBehaviour enemy) {

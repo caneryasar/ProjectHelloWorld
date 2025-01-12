@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using DG.Tweening;
+using JetBrains.Annotations;
 using UniRx;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -20,12 +21,14 @@ public class EnemyBehaviour : MonoBehaviour {
 
     private IEnemyState _currentState;
 
+    private Camera _mainCam;
+
     internal bool isDead;
     internal bool isHit;
     internal bool canAttack;
     internal bool isAttacking;
-    internal bool countered;
     internal bool finished;
+    internal bool isTarget;
 
     private EventArchive _eventArchive;
     private bool _isPlayable;
@@ -36,6 +39,8 @@ public class EnemyBehaviour : MonoBehaviour {
 
     private void Awake() {
         
+        _mainCam = Camera.main;
+        
         _eventArchive = FindAnyObjectByType<EventArchive>();
         _eventArchive.OnPlayable += playable => _isPlayable = playable;
         _eventArchive.OnPlayerHitEnemy += GotHit;
@@ -43,13 +48,16 @@ public class EnemyBehaviour : MonoBehaviour {
             
             if(t == transform) {
                 
+                isTarget = true;
                 _isSelected = true;
-                indicator.gameObject.SetActive(true);
+                indicator.color = Color.yellow;
             }
             else {
                 
-                _isSelected = false;
-                indicator.gameObject.SetActive(false); }
+                isTarget = false;
+                _isSelected = false; 
+                indicator.color = Color.white;
+            }
         };
     }
 
@@ -89,7 +97,7 @@ public class EnemyBehaviour : MonoBehaviour {
             return;
         }
 
-        indicatorCanvas.transform.LookAt(player.transform.position);
+        indicatorCanvas.transform.LookAt(_mainCam.transform.position);
 
         if(isAttacking) {
 
@@ -165,13 +173,20 @@ public class EnemyBehaviour : MonoBehaviour {
         animator.SetFloat("DirectionX", localDirection.x);
     }
 
-    internal bool CloseToPlayer() {
-        
-        if(!player) { return false; }
-        
-        float distance = Vector3.Distance(transform.position, player.transform.position);
+    internal bool CloseToPlayer(out PlayerController playerStatus) {
 
-        float attackRange = 1.5f; 
+        if(!player) {
+            
+            playerStatus = null;
+            
+            return false;
+        }
+        
+        var distance = Vector3.Distance(transform.position, player.transform.position);
+
+        var attackRange = 1.5f;
+
+        playerStatus = player;
         
         return distance <= attackRange;
     }
@@ -207,7 +222,6 @@ public class EnemyBehaviour : MonoBehaviour {
         if(health <= 0) {
             
             finished = player.inFinisher;
-            countered = player.inCounter;
             isDead = true;
         }
     }
@@ -218,7 +232,16 @@ public class EnemyBehaviour : MonoBehaviour {
         isDead = false;
         isHit = false;
         finished = false;
-        countered = false;
         _canProcess = false;
+    }
+
+    public void StartAttack() {
+        
+        _eventArchive.InvokeOnEnemyAttackBegin();
+    }
+
+    public void EndAttack() {
+        
+        _eventArchive.InvokeOnEnemyAttackEnd();
     }
 }

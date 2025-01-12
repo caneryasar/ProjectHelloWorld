@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Enemy;
 using UnityEngine;
 
 public class AttackState : IEnemyState {
@@ -10,33 +11,51 @@ public class AttackState : IEnemyState {
 
     public void UpdateState(EnemyBehaviour enemy) {
         
+        enemy.LookAtPlayer();
+        
         if(enemy.isDead) {
             
             enemy.TransitionToState(new DieState());
             return;
         }
 
-        if(enemy.isHit) {
+        
+
+        if(enemy.CloseToPlayer(out var player)) {
+
+            if(player.inAttack && enemy.isTarget) {
+                
+                enemy.navMeshAgent.speed = 0f;
+                enemy.navMeshAgent.isStopped = true;
+
+                if(enemy.isHit) {
+                    
+                    enemy.TransitionToState(new HitState());
+                }
+                
+                return;
+            }
             
-            enemy.TransitionToState(new HitState());
-            return;
-        }
-
-        if(enemy.CloseToPlayer()) {
-
             enemy.navMeshAgent.speed = 0f;
             enemy.navMeshAgent.isStopped = true;
             enemy.animator.SetTrigger("Attacking");
+
+            enemy.StartAttack();
+                
             
-            DOVirtual.DelayedCall(1.5f, () => enemy.TransitionToState(new StrafeState()));
-            return;
+            if(enemy.animator.GetNextAnimatorStateInfo(0).normalizedTime >= 1f) {
+
+                enemy.TransitionToState(new StrafeState());
+                return;
+            }
         }
 
         enemy.navMeshAgent.SetDestination(enemy.player.transform.position - (Vector3.forward + Vector3.right) * .65f);
-        enemy.LookAtPlayer();
     }
     
     public void ExitState(EnemyBehaviour enemy) {
+
+        enemy.EndAttack();
 
         enemy.isAttacking = false;
         

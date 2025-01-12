@@ -38,11 +38,11 @@ public class PlayerAnimator : MonoBehaviour {
         _eventArchive.OnJumpInput += SetJump;
         _eventArchive.OnResetJump += ResetJump;
         _eventArchive.OnDashTriggered += TriggerDash;
-        _eventArchive.OnAttack += SetAttack;
+        _eventArchive.OnAttackBegin += SetAttack;
         _eventArchive.OnSecondAttack += Trigger2ndCombo;
         _eventArchive.OnThirdAttack += Trigger3rdCombo;
         _eventArchive.OnComboBroken += ResetCombos;
-        _eventArchive.OnAttackCountChange += ChangeComboChange;
+        _eventArchive.OnAttackCountChange += ChangeCombo;
         _eventArchive.OnDirectionChangeFocused += GetDirection;
         _eventArchive.OnFocusHold += SetMoveFocused;
         _eventArchive.OnEnemyHitPlayer += GetHit;
@@ -50,8 +50,6 @@ public class PlayerAnimator : MonoBehaviour {
     }
 
     private void SetCounter(int counter) {
-        
-        Debug.Log($"current counter is: {counter}");
         
         _animator.SetBool("isCountering", true);
         _animator.SetInteger("CounterType", counter);
@@ -81,7 +79,7 @@ public class PlayerAnimator : MonoBehaviour {
         _animator.SetFloat("DirectionZ", direction.y);
     }
 
-    private void ChangeComboChange(int count) {
+    private void ChangeCombo(int count) {
         
         _animator.SetInteger(ComboStep, count);       
     }

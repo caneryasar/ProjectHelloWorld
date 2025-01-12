@@ -1,3 +1,4 @@
+using Enemy;
 using UnityEngine;
 using Random = UnityEngine.Random;
 public class StrafeState : IEnemyState
@@ -34,11 +35,20 @@ public class StrafeState : IEnemyState
             return;
         }
 
-        if (enemy.isHit)
+        if(enemy.CloseToPlayer(out var player)) {
+
+            if(player.inAttack && enemy.isTarget) {
+                
+                enemy.TransitionToState(new HitState());
+                return;
+            }
+        }
+        
+        /*if (enemy.isHit)
         {
             enemy.TransitionToState(new HitState());
             return;
-        }
+        }*/
 
         if (enemy.isAttacking)
         {

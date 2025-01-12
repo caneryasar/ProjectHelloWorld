@@ -48,7 +48,8 @@ public class PlayerController : MonoBehaviour {
     internal bool inFinisher;
     internal bool inCounter;
     internal bool inDash;
-
+    internal bool inAttack;
+    
     private bool _canFight;
     private bool _canCounter;
 
@@ -102,6 +103,7 @@ public class PlayerController : MonoBehaviour {
         _eventArchive.OnDashTriggered += () => _isDashing = true;
         _eventArchive.OnCounterable += GetCounterTarget;
         _eventArchive.OnFocus += () => _focusTriggered = true;
+        _eventArchive.OnEnemyAttackBegin += () => _canCounter = false;
         _eventArchive.OnFocusHold += holding => {
             
             _isFocused = holding;
@@ -136,9 +138,9 @@ public class PlayerController : MonoBehaviour {
         };
     }
 
-    private void GetCounterTarget(bool canCounter, EnemyBehaviour counter) {
+    private void GetCounterTarget(EnemyBehaviour counter) {
 
-        _canCounter = canCounter;
+        _canCounter = true;
         _counterTarget = counter;
     }
 
@@ -198,44 +200,56 @@ public class PlayerController : MonoBehaviour {
         
         if(_isAttacking && !_isDashing && _isGrounded) {
 
+            inAttack = true;
+
+
+            if(!_isFocused && _canCounter) {
+                
+                if(inCounter) { return; }
+                
+                var target = _counterTarget.transform;
+                var targetPos = target.position;
+                targetPos.y = transform.position.y;
+                        
+                transform.LookAt(targetPos);
+                Debug.Log("dotween is about to be triggered");
+                transform.DOMove(targetPos - (Vector3.forward + Vector3.right) * .65f, 1f).SetEase(Ease.Linear).OnUpdate(() => {
+                    
+                    transform.LookAt(targetPos);
+                    inCounter = true;
+                }).OnComplete(() => {
+                    
+                    transform.LookAt(targetPos);
+                    _eventArchive.InvokeOnCounterTriggered(Random.Range(1, 4));
+                });
+                
+                return;
+            }
+
+            inCounter = false;
+
             if(_isFocused) {
 
                 if(_target && Vector3.Distance(transform.position, _target.position) < 5) {
                     
-                    transform.DOMove(_target.position - (Vector3.forward + Vector3.right) * .65f, 1f);
+                    transform.DOMove(_target.position - (Vector3.forward + Vector3.right) * .65f, 1f)
+                        .OnComplete(() => _eventArchive.InvokeOnAttackBegin());
                 }
             }
+            else {
 
-            if(!_isFocused && _canCounter) {
-                
-                
-                if(inCounter) { return; }
-                
-                Debug.Log("fucking counter will you");
-                
-                var targetPos = _counterTarget.transform.position;
-                targetPos.y = transform.position.y;
-                        
-                transform.LookAt(targetPos);
-                transform.DOMove(targetPos - (Vector3.forward + Vector3.right) * .65f, 1f).SetEase(Ease.Linear).OnComplete(() => {
-
-                    _counterTarget.countered = true;
-                    _eventArchive.InvokeOnCounterTriggered(Random.Range(1, 4));
-                }).OnComplete(() => { 
-                    
-                    DOVirtual.DelayedCall(1f, () => inCounter = false);
-                });
-
-                inCounter = true;
-                
-                return;
+                _eventArchive.InvokeOnAttackBegin();
             }
-            
+
             if(_attackTriggered == 0) {
 
                 _attackTriggered = 1;
 
                 _comboTimer = _attackComboTime;
+
+                _attackTime = 0f;
+                    
+                return;
             }
             
             
@@ -269,6 +283,8 @@ public class PlayerController : MonoBehaviour {
                     return;
                 }
 
+                inFinisher = false;
+
                 _attackTime += Time.deltaTime;
                 
                 return;
@@ -284,12 +300,12 @@ public class PlayerController : MonoBehaviour {
             _comboTimer = 0f;
             inFinisher = false;
             inCounter = false;
-            
+            inAttack = false;
             return;
         }
 
-        _isAttacking = false;
-        _attackTriggered = 0;
+        // _isAttacking = false;
+        // _attackTriggered = 0;
         
         //todo: fix dashing
         
@@ -308,7 +324,7 @@ public class PlayerController : MonoBehaviour {
             if(inDash) { return; }
             _isDashing = false;
         }
-
+        
         _charCon.Move(moveDirection * (Time.deltaTime * _moveSpeed));
 
         if(_moveInput != Vector3.zero && !_isFocused) {
@@ -344,6 +360,11 @@ public class PlayerController : MonoBehaviour {
         var moveUpwards = new Vector3(0, _verticalVelocity, 0);
         _charCon.Move(moveUpwards * Time.deltaTime);
 
+    }
+
+    private void ProcessAttack() {
+        
+        
     }
 
     

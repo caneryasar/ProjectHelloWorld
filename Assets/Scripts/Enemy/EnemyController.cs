@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public class EnemyController : MonoBehaviour {
 
-    // public GameObject enemy;
+    public EnemyBehaviour currentAttackingEnemy;
 
     // [SerializeField] private List<Enemy> _enemies;
     [SerializeField] private List<EnemyBehaviour> _enemies;
@@ -23,6 +23,13 @@ public class EnemyController : MonoBehaviour {
         _eventArchive = FindAnyObjectByType<EventArchive>();
 
         _enemies = GetComponentsInChildren<EnemyBehaviour>().ToList();
+
+        _eventArchive.OnEnemyAttackEnd += SetNewEnemy;
+    }
+
+    private void SetNewEnemy() {
+        
+        StartCoroutine(SetToAttackRoutine());
     }
 
     private void OnTriggerEnter(Collider other) {
@@ -36,14 +43,11 @@ public class EnemyController : MonoBehaviour {
 
     private IEnumerator SetToAttackRoutine() {
         
-        while(true) {
-            
-            yield return new WaitForSeconds(_attackTime);
-            
-            SetToAttack();
+        
+        yield return new WaitForSeconds(_attackTime);
+        
 
-            yield return null;
-        }
+        SetToAttack();
     }
 
     private void SetToAttack() {
@@ -54,6 +58,7 @@ public class EnemyController : MonoBehaviour {
 
         var enemyIndex = Random.Range(0, validEnemies.Count);
 
+        currentAttackingEnemy = validEnemies[enemyIndex];
         
         validEnemies[enemyIndex].isAttacking = true;
     }
@@ -73,11 +78,9 @@ public class EnemyController : MonoBehaviour {
             
             enemy.canAttack = false;
         }
-        //todo: make enemy status change to idle
     }
 
     private void CommandEnemies() {
-        //todo: make enemy status change to strafe
 
         foreach(var enemy in _enemies) {
             
@@ -85,10 +88,6 @@ public class EnemyController : MonoBehaviour {
         }
     }
 
-    private void RespawnEnemies() {
-        
-        //todo spawn at pos or (probably this ->) spawn at start enable at trigger
-    }
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

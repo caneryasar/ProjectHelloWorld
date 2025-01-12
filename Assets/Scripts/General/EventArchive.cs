@@ -3,18 +3,34 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public class EventArchive : MonoBehaviour {
-
     
-    //todo: add player region and player specific events (onplayermove etc.)
+    //todo: group in structs initialize in awake
+    
+    
 
     #region Anims
+
+    /*
+    public event Action OnAnimateMove;
+    public event Action OnAnimateMoveLocked;
+    public event Action OnAnimateSprint;
+    public event Action OnAnimateDash;
+    public event Action OnAnimateJump;
+    public event Action OnAnimateDoubleJump;
+    public event Action OnAnimate1stAttack;
+    public event Action OnAnimate2ndAttack;
+    public event Action OnAnimate3rdAttack;
+    public event Action<int> OnAnimateCounter;
+    */
     
+    public event Action OnAttackBegin; 
     public event Action OnComboBroken;
     public event Action OnSecondAttack;
     public event Action OnThirdAttack;
     public event Action<int> OnAttackCountChange;
     public event Action<Vector2> OnDirectionChangeFocused; 
 
+    public void InvokeOnAttackBegin() { OnAttackBegin?.Invoke(); }
     public void InvokeOnComboBroken() { OnComboBroken?.Invoke(); }
     public void InvokeOnSecondAttack() { OnSecondAttack?.Invoke(); }
     public void InvokeOnThirdAttack() { OnThirdAttack?.Invoke(); }
@@ -35,8 +51,10 @@ public class EventArchive : MonoBehaviour {
     public event Action<Transform> OnTargetAssigned;
     public event Action OnResetCamTarget;
     public event Action<int> OnCounterTriggered;
-    public event Action<bool, EnemyBehaviour> OnCounterable;
+    public event Action<EnemyBehaviour> OnCounterable;
     public event Action<EnemyBehaviour> OnCurrentEnemyTarget;
+    public event Action OnEnemyAttackBegin;
+    public event Action OnEnemyAttackEnd;
     
     //Methods
     public void InvokeOnPlayable(bool isPlayable) { OnPlayable?.Invoke(isPlayable); }
@@ -49,8 +67,10 @@ public class EventArchive : MonoBehaviour {
     public void InvokeOnTargetSearch(Transform player) { OnTargetSearch?.Invoke(player);}
     public void InvokeOnResetCamTarget() { OnResetCamTarget?.Invoke(); }
     public void InvokeOnCounterTriggered(int counter) { OnCounterTriggered?.Invoke(counter);}
-    public void InvokeOnCounterable(bool canCounter, EnemyBehaviour counter) { OnCounterable?.Invoke(canCounter, counter);}
+    public void InvokeOnCounterable(EnemyBehaviour counter) { OnCounterable?.Invoke(counter);}
     public void InvokeOnCurrentEnemyTarget(EnemyBehaviour target) { OnCurrentEnemyTarget?.Invoke(target);}
+    public void InvokeOnEnemyAttackBegin() { OnEnemyAttackBegin?.Invoke(); }
+    public void InvokeOnEnemyAttackEnd() { OnEnemyAttackEnd?.Invoke(); }
 
     #endregion
     
