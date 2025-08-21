@@ -65,3 +65,9 @@ This demo serves as both a learning exercise and a foundational framework for fu
 | **Version Control**      | Git + GitHub                                    |
 
 ---
+
+## 🖥️ References and Credits
+
+### Assets
+
+- [Jammo Character](https://assetstore.unity.com/packages/3d/characters/jammo-character-mix-and-jam-158456**) by Mix and Jam
